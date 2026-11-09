@@ -1,0 +1,52 @@
+{
+  "_nota": "Datos 100% ficticios de la cadena inventada 'Farmalab'. Simulan un catalogo de servicios (CMDB) y un historial de despliegues.",
+  "servicios": {
+    "pagos-gateway": {
+      "descripcion": "Autoriza los pagos con tarjeta de la tienda en linea y de las cajas contra el adquirente.",
+      "equipo": "Pagos",
+      "guardia": "guardia-pagos",
+      "criticidad": "alta",
+      "depende_de": ["adquirente-co (externo)"],
+      "lo_consumen": ["pedidos-api"],
+      "slo": "Tasa de error menor a 2% y latencia p95 menor a 1500 ms",
+      "runbook": [
+        "1. Confirmar en metricas si sube farmalab/error_rate y farmalab/latency_p95_ms del servicio.",
+        "2. Revisar en logs el error_code dominante. UPSTREAM_TIMEOUT apunta al adquirente o a la configuracion de timeouts.",
+        "3. Si hubo un despliegue en los ultimos 60 minutos, compararlo con el inicio del incidente. Si coincide, proponer rollback a la version anterior.",
+        "4. Abrir un ticket de severidad alta para el equipo Pagos con la evidencia. El rollback lo ejecuta la guardia, nunca el agente."
+      ]
+    },
+    "pedidos-api": {
+      "descripcion": "Recibe y orquesta los pedidos de la tienda en linea y la app.",
+      "equipo": "Comercio digital",
+      "guardia": "guardia-comercio",
+      "criticidad": "alta",
+      "depende_de": ["pagos-gateway", "inventario-sync"],
+      "lo_consumen": ["app movil", "sitio web"],
+      "slo": "Tasa de error menor a 1% y latencia p95 menor a 1200 ms",
+      "runbook": [
+        "1. Si los errores son PAGO_PENDIENTE, el problema esta aguas abajo: revisar pagos-gateway.",
+        "2. Si los errores son propios (5xx sin dependencia), revisar el ultimo despliegue."
+      ]
+    },
+    "inventario-sync": {
+      "descripcion": "Sincroniza el inventario de las tiendas con el catalogo en linea cada 5 minutos.",
+      "equipo": "Abastecimiento",
+      "guardia": "guardia-abastecimiento",
+      "criticidad": "media",
+      "depende_de": [],
+      "lo_consumen": ["pedidos-api"],
+      "slo": "Retraso de sincronizacion menor a 15 minutos",
+      "runbook": [
+        "1. Los avisos STOCK_DESACTUALIZADO aislados son normales y no requieren ticket.",
+        "2. Abrir ticket solo si el retraso supera los 15 minutos en mas de 10 tiendas."
+      ]
+    }
+  },
+  "despliegues": [
+    {"servicio": "pagos-gateway", "version": "3.8.2", "minutos_antes_del_incidente": 3, "autor": "pipeline-ci", "cambio": "Reduce el timeout hacia el adquirente de 8 s a 2 s y actualiza el cliente HTTP."},
+    {"servicio": "pagos-gateway", "version": "3.8.1", "minutos_antes_del_incidente": 4300, "autor": "pipeline-ci", "cambio": "Agrega logs estructurados por tienda."},
+    {"servicio": "pedidos-api", "version": "5.14.0", "minutos_antes_del_incidente": 1500, "autor": "pipeline-ci", "cambio": "Nuevo endpoint de seguimiento de pedido."},
+    {"servicio": "inventario-sync", "version": "2.2.7", "minutos_antes_del_incidente": 8700, "autor": "pipeline-ci", "cambio": "Ajuste de reintentos."}
+  ]
+}

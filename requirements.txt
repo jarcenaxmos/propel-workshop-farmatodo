@@ -1,0 +1,5 @@
+# Versiones probadas el 9-nov-2026 con Python 3.12. No las subas sin volver a probar los labs.
+google-adk[mcp,eval,gcp,otel-gcp]==2.14.0
+mcp==2.3.0
+google-cloud-modelarmor==0.7.5
+google-cloud-aiplatform==2.7.0
