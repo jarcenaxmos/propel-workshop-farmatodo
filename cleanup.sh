@@ -41,8 +41,7 @@ for e in json.load(sys.stdin).get("reasoningEngines", []):
         print(e["name"])')"
 [[ -f "${AQUI}/sesion-2-agent-runtime/.agent_engine_id" ]] \
   && IDS="${IDS}"$'\n'"projects/x/locations/${REGION}/reasoningEngines/$(cat "${AQUI}/sesion-2-agent-runtime/.agent_engine_id")"
-printf '%s\n' "${IDS}" | sort -u | while read -r nombre; do
-  [[ -n "${nombre}" ]] || continue
+printf '%s\n' "${IDS}" | awk -F/ 'NF && !visto[$NF]++' | while read -r nombre; do
   echo "borrando ${nombre}"
   curl -s -X DELETE -H "Authorization: Bearer ${TOKEN}" "${API}/${nombre}?force=true" >/dev/null
   # Agent Identity: el principal muere con la instancia, pero sus roles en el
