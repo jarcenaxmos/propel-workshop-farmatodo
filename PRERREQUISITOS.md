@@ -1,6 +1,6 @@
 # Prerrequisitos de los labs · Workshop Propel Farmatodo
 
-Cada participante hace los labs desde su PC, en **un proyecto de Google Cloud propio**. Deja todo listo y verificado antes de la sesión para no gastar tiempo del hands-on en accesos.
+Cada participante hace los labs desde Cloud Shell (en el navegador de su PC), en **un proyecto de Google Cloud propio**. Deja todo listo y verificado antes de la sesión para no gastar tiempo del hands-on en accesos.
 
 ## 1. Proyecto y permisos
 
