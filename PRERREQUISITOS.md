@@ -19,7 +19,8 @@ Cada participante hace los labs desde Cloud Shell (en el navegador de su PC), en
 | `roles/serviceusage.serviceUsageAdmin` | Habilitar APIs (no hace falta si un admin ya las habilitó) | todas |
 | `roles/resourcemanager.projectIamAdmin` | Darle roles a la Agent Identity del agente (`otorgar_roles.sh`) y quitárselos al limpiar | II |
 | `roles/modelarmor.admin` | Crear el template de Model Armor | VI |
-| `roles/agentregistry.viewer` | Ver agentes y servidores MCP en Agent Registry | II |
+| `roles/agentregistry.viewer` | Ver agentes, servidores MCP y skills en Agent Registry, y leer la skill | II |
+| `roles/agentregistry.editor` | Publicar y borrar la skill de ejemplo | II |
 
 La documentación de los MCP pide `roles/logging.admin` y `roles/monitoring.admin`. Los labs solo usan herramientas de lectura y se probaron con los roles viewer de la tabla. La opción mínima no se probó completa de punta a punta: la prueba se hizo con `roles/owner`.
 

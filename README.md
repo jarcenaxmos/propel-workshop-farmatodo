@@ -27,7 +27,7 @@ source .venv/bin/activate
 | Sesión | Lab | Tiempo | Guía |
 |---|---|---|---|
 | **IV · ADK y Model Context Protocol** | **Hands-on: agente de observabilidad con MCP y aprobación humana** | **90 min** | [`sesion-4-adk-mcp/guia.md`](sesion-4-adk-mcp/guia.md) |
-| II · Agent Runtime y Agent Registry | Desplegar el agente con Agent Identity, verlo registrado y publicar una skill versionada | 10 min (6 de espera) | [`sesion-2-agent-runtime/guia.md`](sesion-2-agent-runtime/guia.md) |
+| II · Agent Runtime y Agent Registry | Desplegar el agente con Agent Identity, verlo registrado y publicar una skill versionada | 18 min (8 de espera) | [`sesion-2-agent-runtime/guia.md`](sesion-2-agent-runtime/guia.md) |
 | III · Gen AI Evaluation | Evaluar el agente con `adk eval`: trayectoria, rúbricas y una regresión | 10 min | [`sesion-3-evaluacion/guia.md`](sesion-3-evaluacion/guia.md) |
 | V · Agentes en producción | Trazas del agente desplegado: tiempos y tokens | 5 min | [`sesion-5-produccion/guia.md`](sesion-5-produccion/guia.md) |
 | VI · Model Armor | Un template de Model Armor delante y detrás del modelo | 10 min | [`sesion-6-model-armor/guia.md`](sesion-6-model-armor/guia.md) |

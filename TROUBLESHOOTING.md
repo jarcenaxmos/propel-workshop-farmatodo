@@ -105,6 +105,20 @@ Elige una región permitida: `REGION=us-east1 ./setup.sh` y después `./sesion-2
 **`gcloud agent-registry: Invalid choice`**
 Tu Google Cloud CLI es anterior a ese grupo de comandos. Usa `python sesion-2-agent-runtime/ver_registro.py`, que llama a la API REST, o actualiza con `gcloud components update`.
 
+## Skills de Agent Registry
+
+**`503 The service is currently unavailable` al listar o crear skills** *(observado)*
+Estás usando una región (por ejemplo `us-east1`). Las skills viven en `global`: `publicar_skill.py` y el agente de ejemplo ya lo usan.
+
+**Busco la skill como `redactar-ticket-incidente` y da 404** *(observado)*
+Sin un publisher verificado, el registro antepone `private-` al id: es `private-redactar-ticket-incidente`. El `name` dentro del `SKILL.md` no cambia.
+
+**`cannot set default revision to a revision with pending scan results`** *(observado)*
+La revisión nueva todavía se está escaneando. `publicar_skill.py` espera a que termine; si lo ejecutaste a mano, repite en un minuto.
+
+**Crear la skill tarda 1 o 2 minutos** *(observado)*
+Es normal: el registro escanea la seguridad de cada revisión.
+
 ## Model Armor
 
 **`404` o `PERMISSION_DENIED` al crear o usar el template** *(previsto)*

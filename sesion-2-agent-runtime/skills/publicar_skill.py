@@ -55,14 +55,14 @@ descripcion = re.search(r"^description:\s*(.+)$", frontmatter, re.M).group(1).st
 version = re.search(r'^\s+version:\s*"?([\w.\-]+)"?', frontmatter, re.M).group(1)
 
 
-def id_revision(v: str) -> str:
-  return "v" + v.replace(".", "-")
-
-
 cred, _ = google.auth.default(scopes=["https://www.googleapis.com/auth/cloud-platform"])
 s = AuthorizedSession(cred)
 s.headers["x-goog-user-project"] = PROYECTO
-SKILL = f"{PADRE}/skills/{nombre}"
+# Sin publisher verificado, Agent Registry antepone "private-" al id de la skill
+# (verificado el 10-nov-2026): la skill "redactar-ticket-incidente" queda como
+# "private-redactar-ticket-incidente". Las revisiones reciben un id generado
+# (rev-UUID); la version se lee de metadata.version de cada revision.
+SKILL = f"{PADRE}/skills/private-{nombre}"
 
 
 def llamar(metodo, ruta, **kw):
@@ -73,14 +73,27 @@ def llamar(metodo, ruta, **kw):
 
 
 def esperar(r):
-  """Si la respuesta es una operacion de larga duracion, espera a que termine."""
+  """Si la respuesta es una operacion de larga duracion, espera a que termine.
+  Crear una skill tarda 1 o 2 minutos: Agent Registry escanea su seguridad."""
   datos = r.json()
-  while datos.get("name", "").find("/operations/") > 0 and not datos.get("done"):
-    time.sleep(2)
-    datos = llamar("GET", datos["name"]).json()
+  if "/operations/" not in datos.get("name", ""):
+    return datos
+  op = datos["name"]
+  while not datos.get("done"):
+    time.sleep(3)
+    datos = llamar("GET", op).json()
   if "error" in datos:
     sys.exit(f"[!] La operacion fallo: {datos['error']}")
   return datos.get("response", datos)
+
+
+def revisiones() -> dict[str, str]:
+  """version -> nombre de la revision, de las revisiones activas de la skill."""
+  r = llamar("GET", f"{SKILL}/revisions", params={"pageSize": 100})
+  if r.status_code != 200:
+    return {}
+  return {x.get("frontmatter", {}).get("metadata", {}).get("version"): x["name"]
+          for x in r.json().get("skillRevisions", [])}
 
 
 def zip_de_la_skill() -> str:
@@ -101,29 +114,38 @@ if args.borrar:
 existe = llamar("GET", SKILL).status_code == 200
 
 if args.default:
-  rev = f"{SKILL}/revisions/{id_revision(args.default)}"
-  if llamar("GET", rev).status_code != 200:
+  rev = revisiones().get(args.default)
+  if not rev:
     sys.exit(f"[!] No existe la version {args.default}. Publicala primero.")
 else:
   archivo = {"archiveUploadSource": {"archiveContent": zip_de_la_skill()}}
-  rev = f"{SKILL}/revisions/{id_revision(version)}"
   if not existe:
-    print(f"Creando la skill {nombre} con la version {version}...")
+    print(f"Creando la skill {nombre} con la version {version} (1 o 2 minutos)...")
     esperar(llamar("POST", f"{PADRE}/skills", params={"skillId": nombre}, json={
         "displayName": nombre, "description": descripcion[:2000],
         "type": "SIMPLE", "targetState": "TARGET_STATE_ACTIVE",
         "initialRevision": archivo}))
-    # La revision inicial recibe un id generado por el servicio: se busca.
-    revs = llamar("GET", f"{SKILL}/revisions").json().get("skillRevisions", [])
-    rev = revs[0]["name"] if revs else rev
-  elif llamar("GET", rev).status_code == 200:
+  elif version in revisiones():
     print(f"La version {version} ya estaba publicada.")
   else:
     print(f"Publicando la version {version} como nueva revision...")
-    esperar(llamar("POST", f"{SKILL}/revisions", params={"skillRevisionId": id_revision(version)},
-                   json=archivo))
+    esperar(llamar("POST", f"{SKILL}/revisions", json=archivo))
+  rev = revisiones().get(version)
+  if not rev:
+    sys.exit("[!] La revision no aparece todavia. Vuelve a ejecutar el script.")
+
+# La politica de la skill es ENABLED_BLOCKING: una revision solo puede ser la
+# vigente cuando termino su escaneo de seguridad.
+for _ in range(60):
+  estado = llamar("GET", rev).json().get("scanResult", {}).get("scanState", "PENDIENTE")
+  if estado == "SUCCEEDED":
+    break
+  if estado not in ("PENDIENTE", "SCAN_STATE_UNSPECIFIED", "RUNNING", "PENDING", "IN_PROGRESS"):
+    sys.exit(f"[!] El escaneo de seguridad de la revision termino en {estado}.")
+  print(f"  esperando el escaneo de seguridad ({estado})...")
+  time.sleep(5)
 
 # Fija la revision vigente (el "default" que sirven los agentes).
 esperar(llamar("PATCH", SKILL, params={"updateMask": "defaultRevision"},
                json={"defaultRevision": rev}))
-print(f"Vigente: {rev}")
+print(f"Vigente: version {args.default or version} -> {rev}")
