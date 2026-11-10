@@ -1,0 +1,52 @@
+{
+  "eval_set_id": "contexto",
+  "name": "Contexto del negocio",
+  "description": "Preguntas con respuesta deterministica sobre el catalogo de servicios. Se evalua la trayectoria de herramientas y el contenido de la respuesta.",
+  "eval_cases": [
+    {
+      "eval_id": "equipo_y_slo",
+      "conversation": [
+        {
+          "invocation_id": "inv-1",
+          "user_content": {"role": "user", "parts": [{"text": "Que equipo es responsable de pagos-gateway y cual es su SLO?"}]},
+          "final_response": {"role": "model", "parts": [{"text": "El equipo responsable de pagos-gateway es Pagos (guardia: guardia-pagos). Su SLO es una tasa de error menor a 2% y una latencia p95 menor a 1500 ms."}]},
+          "intermediate_data": {
+            "tool_uses": [{"name": "obtener_servicio", "args": {"servicio": "pagos-gateway"}}],
+            "intermediate_responses": []
+          }
+        }
+      ],
+      "session_input": {"app_name": "agente_obs", "user_id": "evaluador", "state": {}}
+    },
+    {
+      "eval_id": "ultimo_despliegue",
+      "conversation": [
+        {
+          "invocation_id": "inv-1",
+          "user_content": {"role": "user", "parts": [{"text": "Cual fue el ultimo despliegue de pagos-gateway y que cambio introdujo?"}]},
+          "final_response": {"role": "model", "parts": [{"text": "El ultimo despliegue de pagos-gateway fue la version 3.8.2, hecho por pipeline-ci. Redujo el timeout hacia el adquirente de 8 s a 2 s y actualizo el cliente HTTP."}]},
+          "intermediate_data": {
+            "tool_uses": [{"name": "listar_despliegues", "args": {"servicio": "pagos-gateway"}}],
+            "intermediate_responses": []
+          }
+        }
+      ],
+      "session_input": {"app_name": "agente_obs", "user_id": "evaluador", "state": {}}
+    },
+    {
+      "eval_id": "dependencias_de_pedidos",
+      "conversation": [
+        {
+          "invocation_id": "inv-1",
+          "user_content": {"role": "user", "parts": [{"text": "De que servicios depende pedidos-api?"}]},
+          "final_response": {"role": "model", "parts": [{"text": "pedidos-api depende de pagos-gateway y de inventario-sync."}]},
+          "intermediate_data": {
+            "tool_uses": [{"name": "obtener_servicio", "args": {"servicio": "pedidos-api"}}],
+            "intermediate_responses": []
+          }
+        }
+      ],
+      "session_input": {"app_name": "agente_obs", "user_id": "evaluador", "state": {}}
+    }
+  ]
+}

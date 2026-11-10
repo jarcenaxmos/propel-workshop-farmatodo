@@ -1,0 +1,9 @@
+[
+  {
+    "slug": "gemini",
+    "brand": "Google Gemini (substitute for Gemini Enterprise)",
+    "file": "gemini.svg",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/1/1d/Google_Gemini_icon_2025.svg",
+    "notes": "No standalone Gemini Enterprise logo found on Google hosts; cloud.google.com/gemini-enterprise uses the Gemini 2025 sparkle. Pure-vector sparkle (8.7 KB), which Commons says was taken from Google's own inline SVG on gemini.google/about. Use this for slides."
+  }
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "slug": "vertex-ai",
+    "product": "Vertex AI",
+    "file": "vertex-ai.svg",
+    "source_url": "https://services.google.com/fh/files/misc/core-products-icons.zip",
+    "source_path_in_zip": "Unique Icons/Vertex AI/SVG/VertexAI-512-color.svg",
+    "notes": "Current 2023+ \"Unique Icons\" set (core-products-icons.zip), 512px multicolor."
+  },
+  {
+    "slug": "iam",
+    "product": "Identity and Access Management",
+    "file": "iam.svg",
+    "source_url": "https://services.google.com/fh/files/misc/google-cloud-legacy-icons.zip",
+    "source_path_in_zip": "identity_and_access_management/identity_and_access_management.svg",
+    "notes": "Not in the current 2023+ core set (it only has 19 products); taken from Google's official \"legacy console icons\" ZIP on the same page (24px, blue-palette product icon)."
+  },
+  {
+    "slug": "cloud-monitoring",
+    "product": "Cloud Monitoring",
+    "file": "cloud-monitoring.svg",
+    "source_url": "https://services.google.com/fh/files/misc/google-cloud-legacy-icons.zip",
+    "source_path_in_zip": "cloud_monitoring/cloud_monitoring.svg",
+    "notes": "Not in the current 2023+ core set (it only has 19 products); taken from Google's official \"legacy console icons\" ZIP on the same page (24px, blue-palette product icon)."
+  },
+  {
+    "slug": "google-cloud",
+    "product": "Google Cloud logo",
+    "file": "google-cloud.svg",
+    "source_url": "https://www.gstatic.com/cgc/google-cloud-logo-fullcolor.svg",
+    "source_path_in_zip": null,
+    "notes": "Official full-color Google Cloud logo lockup (mark + \"Google Cloud\" wordmark, 123x20) referenced from cloud.google.com/icons page header. Not a mark-only file."
+  },
+  {
+    "slug": "cloud-logging",
+    "product": "Cloud Logging",
+    "file": "cloud-logging.svg",
+    "source_url": "https://services.google.com/fh/files/misc/google-cloud-legacy-icons.zip",
+    "source_path_in_zip": "cloud_logging/cloud_logging.svg",
+    "notes": "Not in the current 2023+ core set; taken from Google's official \"legacy console icons\" ZIP (24px, blue-palette product icon)."
+  }
+]

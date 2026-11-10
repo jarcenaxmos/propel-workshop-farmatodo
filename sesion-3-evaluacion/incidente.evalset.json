@@ -1,0 +1,17 @@
+{
+  "eval_set_id": "incidente",
+  "name": "Investigacion del incidente",
+  "description": "El caso completo del hands-on. No hay una unica trayectoria correcta (los filtros llevan horas), asi que se evalua con rubricas y un modelo juez.",
+  "eval_cases": [
+    {
+      "eval_id": "investigar_pagos_gateway",
+      "conversation": [
+        {
+          "invocation_id": "inv-1",
+          "user_content": {"role": "user", "parts": [{"text": "Investiga que pasa con pagos-gateway y dime la causa probable. Todavia no abras ningun ticket."}]}
+        }
+      ],
+      "session_input": {"app_name": "agente_obs", "user_id": "evaluador", "state": {}}
+    }
+  ]
+}

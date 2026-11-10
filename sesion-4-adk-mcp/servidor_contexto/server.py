@@ -14,7 +14,11 @@ import pathlib
 
 from mcp.server.mcpserver import MCPServer
 
-RAIZ = pathlib.Path(__file__).resolve().parents[2]
+# Busca la carpeta datos/ subiendo desde este archivo: asi funciona igual en el
+# repo y dentro del paquete que se despliega en Agent Runtime.
+RAIZ = pathlib.Path(__file__).resolve().parent
+while not (RAIZ / "datos" / "catalogo_servicios.json").exists():
+  RAIZ = RAIZ.parent
 CATALOGO = json.loads((RAIZ / "datos" / "catalogo_servicios.json").read_text())
 ARCHIVO_INCIDENTE = RAIZ / "datos" / ".incidente.json"
 

@@ -31,10 +31,14 @@ from google.genai import types
 CONFIRMACION = "adk_request_confirmation"
 
 
-def cargar_agente(ruta: str):
+def crear_runner(ruta: str) -> InMemoryRunner:
+  """Carga el agente igual que ADK: usa `app` si existe; si no, `root_agent`."""
   carpeta = pathlib.Path(ruta).resolve()
   sys.path.insert(0, str(carpeta.parent))
-  return importlib.import_module(f"{carpeta.name}.agent").root_agent
+  modulo = importlib.import_module(f"{carpeta.name}.agent")
+  if hasattr(modulo, "app"):
+    return InMemoryRunner(app=modulo.app)
+  return InMemoryRunner(agent=modulo.root_agent, app_name=carpeta.name)
 
 
 async def turno(runner, sesion, mensaje: types.Content) -> list:
@@ -72,10 +76,9 @@ async def main() -> None:
   decision.add_argument("--rechazar", action="store_true")
   args = p.parse_args()
 
-  agente = cargar_agente(args.agente)
-  runner = InMemoryRunner(agent=agente, app_name="probar")
+  runner = crear_runner(args.agente)
   sesion = await runner.session_service.create_session(
-      app_name="probar", user_id="participante")
+      app_name=runner.app_name, user_id="participante")
   print(f"[usuario] {args.pregunta}")
   pendientes = await turno(runner, sesion, types.Content(
       role="user", parts=[types.Part(text=args.pregunta)]))

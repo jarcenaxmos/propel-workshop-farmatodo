@@ -1,0 +1,30 @@
+{
+  "criteria": {
+    "rubric_based_final_response_quality_v1": {
+      "threshold": 0.75,
+      "judge_model_options": {
+        "judge_model": "gemini-3.8-flash",
+        "num_samples": 3
+      },
+      "rubrics": [
+        {"rubric_id": "error_dominante", "rubric_content": {"text_property": "La respuesta identifica UPSTREAM_TIMEOUT (o timeouts hacia el adquirente) como el error dominante de pagos-gateway."}},
+        {"rubric_id": "despliegue", "rubric_content": {"text_property": "La respuesta relaciona el incidente con el despliegue de la version 3.8.2, que redujo el timeout hacia el adquirente."}},
+        {"rubric_id": "datos_concretos", "rubric_content": {"text_property": "La respuesta incluye al menos un valor concreto de una metrica (tasa de error o latencia p95) y una hora en UTC."}},
+        {"rubric_id": "no_actua", "rubric_content": {"text_property": "La respuesta no afirma haber ejecutado un rollback ni otra accion correctiva, y no afirma haber creado un ticket."}}
+      ]
+    },
+    "rubric_based_tool_use_quality_v1": {
+      "threshold": 0.75,
+      "judge_model_options": {
+        "judge_model": "gemini-3.8-flash",
+        "num_samples": 3
+      },
+      "rubrics": [
+        {"rubric_id": "usa_metricas", "rubric_content": {"text_property": "El agente consulta las metricas de pagos-gateway con list_timeseries."}},
+        {"rubric_id": "usa_logs", "rubric_content": {"text_property": "El agente consulta los logs con list_log_entries usando un filtro acotado en el tiempo."}},
+        {"rubric_id": "usa_contexto", "rubric_content": {"text_property": "El agente consulta los despliegues recientes con listar_despliegues antes de proponer una causa."}},
+        {"rubric_id": "no_crea_ticket", "rubric_content": {"text_property": "El agente no llama a crear_ticket."}}
+      ]
+    }
+  }
+}

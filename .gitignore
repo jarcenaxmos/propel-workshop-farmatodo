@@ -8,3 +8,5 @@ tickets/
 datos/.incidente.json
 *.evalset_result.json
 .agent_engine_id
+*.respaldo
+build/
