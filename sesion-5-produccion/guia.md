@@ -36,4 +36,4 @@ En **Agent Platform → Agent Runtime → tu agente** están además las métric
 
 - Desde ADK 2.13 la telemetría sigue las convenciones GenAI de OpenTelemetry y ya no existe el span `call_llm`. Si tienes consultas o tableros que filtran por ese nombre, cámbialos a `generate_content`.
 - Los tokens de entrada son altos por las definiciones de las herramientas MCP (ver la tabla del paso 3 de la sesión IV). La mayoría entra por caché de contexto, pero es el primer lugar donde mirar el costo.
-- Lo que la charla cubre y este ejemplo no: revisiones con reparto de tráfico (Preview), Agent Identity, Agent Gateway y evaluación continua.
+- Lo que la charla cubre y este ejemplo no: revisiones con reparto de tráfico (Preview), Agent Gateway y evaluación continua. Agent Identity sí la usa el agente de este lab (ver la sesión II): en la traza verás los spans `tools/call` de los servidores MCP, que el agente invocó con su propia identidad.

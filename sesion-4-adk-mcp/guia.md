@@ -1,4 +1,4 @@
-# Sesión IV · ADK y Model Context Protocol (hands-on, 90 min)
+# Sesión IV · ADK y Model Context Protocol (hands-on, 90 min: 65 de camino principal y el resto de holgura)
 
 Vas a construir un **agente de observabilidad**: lee señales de Cloud Logging y Cloud Monitoring por MCP, toma contexto de un sistema externo (catálogo de servicios, runbooks y despliegues) y abre un ticket, pero solo después de que una persona lo aprueba.
 
@@ -6,15 +6,17 @@ Vas a construir un **agente de observabilidad**: lee señales de Cloud Logging y
 
 El escenario es ficticio. **Farmalab** es una cadena de farmacias inventada, y `setup.sh` sembró en tu proyecto un incidente: el servicio `pagos-gateway` empezó a fallar hace unos minutos. Tu agente tiene que descubrir por qué.
 
-| Paso | Qué haces | Tiempo |
-|---|---|---|
-| 0 | Preparar el entorno | 10 min |
-| 1 | Un agente mínimo | 10 min |
-| 2 | Leer Cloud Logging por MCP | 15 min |
-| 3 | Sumar Cloud Monitoring por MCP | 15 min |
-| 4 | Contexto de sistemas externos con un servidor MCP propio | 15 min |
-| 5 | Abrir el ticket con aprobación humana | 15 min |
-| 6 | Extra: un guardrail con un callback | 10 min |
+| Paso | Qué haces | Tiempo | Camino |
+|---|---|---|---|
+| 0 | Preparar el entorno | 10 min | principal |
+| 1 | Un agente mínimo | 10 min | principal |
+| 2 | Leer Cloud Logging por MCP | 15 min | principal |
+| 3 | Sumar Cloud Monitoring por MCP | 15 min | principal |
+| 4 | Contexto de sistemas externos con un servidor MCP propio | 15 min | **opcional** (si lo saltas: 1 min) |
+| 5 | Abrir el ticket con aprobación humana | 15 min | principal |
+| 6 | Un guardrail con un callback | 10 min | **opcional** |
+
+**Camino principal: 0, 1, 2, 3, 5 = 65 minutos, más 1 minuto si saltas el paso 4. Quedan unos 24 minutos de holgura** para preguntas, para algún paso que se atrase o para hacer un opcional. Haz el paso 4 si vas bien de tiempo; el paso 6 al final, solo si sobra.
 
 **Cómo se trabaja.** Editas un solo archivo, `sesion-4-adk-mcp/agente_obs/agent.py`. Cada paso termina con un **punto de control**: un comando y lo que deberías ver. Si te atrasas, `./ponerse-al-dia.sh N` deja tu archivo como la solución del paso N y sigues desde ahí. Las soluciones completas están en `solucion/paso-N/`.
 
@@ -146,6 +148,7 @@ root_agent = LlmAgent(
 Qué acabas de usar:
 
 - `header_provider` se llama en cada conexión, así el token nunca queda vencido. En tu máquina es tu usuario; desplegado, es la Agent Identity del agente.
+- `url_mcp` y `cliente_http` vienen de `agente_obs/conexion_google.py`, que ya está hecho y no se edita. En tu máquina no hacen nada especial. Desplegado con Agent Identity (sesión II), el token del agente va ligado a su certificado y el servidor MCP exige mTLS: ese archivo cambia al endpoint `*.mtls.googleapis.com` y presenta el certificado. Sin eso, el agente desplegado recibe `401`.
 - `tool_filter` decide qué herramientas ve el modelo. El servidor de Logging ofrece seis; el agente solo necesita leer entradas.
 
 **Punto de control.**
@@ -212,7 +215,9 @@ Los esquemas de respuesta de Monitoring (dashboards, políticas) son enormes. Fi
 
 ---
 
-## Paso 4 · Contexto de sistemas externos con un servidor MCP propio (15 min)
+## Paso 4 · Contexto de sistemas externos con un servidor MCP propio (opcional, 15 min)
+
+> **Opcional.** El paso 5 necesita las herramientas de este paso (el equipo responsable y el runbook salen de aquí). Si no lo haces, ejecuta `./ponerse-al-dia.sh 4` (1 minuto): deja tu agente con el paso 4 ya puesto, y sigues en el paso 5. Si sí lo haces, recuerda que el servidor ya está escrito: tú solo lo conectas.
 
 **Objetivo.** Las señales dicen *qué* pasa. Para saber *por qué* y *a quién avisar*, el agente necesita datos que no están en Google Cloud: el catálogo de servicios, el runbook y los despliegues recientes.
 
@@ -273,6 +278,8 @@ Ves llamadas a `list_timeseries`, `list_log_entries`, `obtener_servicio` y `list
 ---
 
 ## Paso 5 · Abrir el ticket con aprobación humana (15 min)
+
+> Si saltaste el paso 4, antes de empezar: `./ponerse-al-dia.sh 4`.
 
 **Objetivo.** El agente ya sabe qué pasa. Ahora actúa: abre un ticket. Como es una acción hacia afuera, una persona la aprueba antes.
 
@@ -341,7 +348,9 @@ Para pensar: el modelo decide *cuándo* proponer el ticket, pero no puede crearl
 
 ---
 
-## Paso 6 · Extra: un guardrail con un callback (10 min)
+## Paso 6 · Extra: un guardrail con un callback (opcional, 10 min)
+
+> **Opcional.** Nada depende de este paso: es el último y no afecta a las sesiones siguientes.
 
 **Objetivo.** Impedir por código, no por prompt, que el agente haga consultas de logs sin acotar el tiempo.
 

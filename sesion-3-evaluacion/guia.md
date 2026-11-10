@@ -1,4 +1,4 @@
-# Sesión III · Evaluar el agente (ejemplo corto, 10 min)
+# Sesión III · Evaluar el agente (ejemplo corto, 13 min)
 
 Acompaña la demo de Gen AI evaluation. Evalúas el agente de la sesión IV con `adk eval` de dos formas: contra una trayectoria esperada y con rúbricas que califica un modelo juez.
 
@@ -25,7 +25,7 @@ adk eval sesion-4-adk-mcp/solucion/paso-5/agente_obs \
 - `final_response_match_v2: PASSED`: un modelo juez comparó la respuesta con la de referencia.
 - Métricas informativas que nunca fallan: `tool_call_count_v1`, `token_usage_v1`, `invocation_duration_v1`.
 
-Tarda cerca de un minuto.
+Tarda cerca de un minuto (medido: 1 min).
 
 ## 2 · Rúbricas para el caso abierto (5 min)
 
@@ -38,9 +38,9 @@ adk eval sesion-4-adk-mcp/solucion/paso-5/agente_obs \
   --print_detailed_results
 ```
 
-**Qué deberías ver.** `Tests passed: 1`, con el puntaje de cada rúbrica (`error_dominante`, `despliegue`, `usa_metricas`, `no_crea_ticket`, etc.) y la razón que dio el juez. Tarda unos dos minutos.
+**Qué deberías ver.** `Tests passed: 1`, con el puntaje de cada rúbrica (`error_dominante`, `despliegue`, `usa_metricas`, `no_crea_ticket`, etc.) y la razón que dio el juez. Tarda unos dos minutos (medido: 2 min).
 
-## 3 · Provoca una regresión (2 min)
+## 3 · Provoca una regresión (5 min)
 
 Evalúa una versión anterior del agente con el mismo evalset. El paso 3 todavía no tiene el contexto del negocio:
 
@@ -50,7 +50,7 @@ adk eval sesion-4-adk-mcp/solucion/paso-3/agente_obs \
   --config_file_path sesion-3-evaluacion/contexto.config.json
 ```
 
-**Qué deberías ver.** `Tests failed: 3`. Eso es lo que detiene un pull request cuando alguien cambia un prompt, una herramienta o el modelo.
+**Qué deberías ver.** `Tests failed: 3`, tras unos cinco minutos: sin el contexto del negocio el agente se pone a buscar con otras herramientas antes de rendirse, y eso es lo que tarda. Eso es lo que detiene un pull request cuando alguien cambia un prompt, una herramienta o el modelo.
 
 Otras pruebas: cambia el modelo con `MODEL=gemini-3.5-flash-lite adk eval ...`, o repite cada caso con `--num_runs 3` para medir estabilidad.
 

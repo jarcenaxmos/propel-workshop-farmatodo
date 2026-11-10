@@ -26,9 +26,9 @@ source .venv/bin/activate
 
 | Sesión | Lab | Tiempo | Guía |
 |---|---|---|---|
-| **IV · ADK y Model Context Protocol** | **Hands-on: agente de observabilidad con MCP y aprobación humana** | **90 min** | [`sesion-4-adk-mcp/guia.md`](sesion-4-adk-mcp/guia.md) |
+| **IV · ADK y Model Context Protocol** | **Hands-on: agente de observabilidad con MCP y aprobación humana** | **90 min** (65 de camino principal; los pasos 4 y 6 son opcionales) | [`sesion-4-adk-mcp/guia.md`](sesion-4-adk-mcp/guia.md) |
 | II · Agent Runtime y Agent Registry | Desplegar el agente con Agent Identity, verlo registrado y publicar una skill versionada | 18 min (8 de espera) | [`sesion-2-agent-runtime/guia.md`](sesion-2-agent-runtime/guia.md) |
-| III · Gen AI Evaluation | Evaluar el agente con `adk eval`: trayectoria, rúbricas y una regresión | 10 min | [`sesion-3-evaluacion/guia.md`](sesion-3-evaluacion/guia.md) |
+| III · Gen AI Evaluation | Evaluar el agente con `adk eval`: trayectoria, rúbricas y una regresión | 13 min | [`sesion-3-evaluacion/guia.md`](sesion-3-evaluacion/guia.md) |
 | V · Agentes en producción | Trazas del agente desplegado: tiempos y tokens | 5 min | [`sesion-5-produccion/guia.md`](sesion-5-produccion/guia.md) |
 | VI · Model Armor | Un template de Model Armor delante y detrás del modelo | 10 min | [`sesion-6-model-armor/guia.md`](sesion-6-model-armor/guia.md) |
 
@@ -59,7 +59,7 @@ setup.sh  cleanup.sh  requirements.txt
 PRERREQUISITOS.md  TROUBLESHOOTING.md
 datos/                  catalogo de servicios ficticio
 scripts/                sembrar_senales.py · verificar.py · probar_agente.py
-sesion-4-adk-mcp/       guia.md · agente_obs/ (tu trabajo) · servidor_contexto/ · solucion/paso-1..6
+sesion-4-adk-mcp/       guia.md · agente_obs/ (tu trabajo; conexion_google.py ya viene hecho) · servidor_contexto/ · solucion/paso-1..6
 sesion-2-agent-runtime/ guia.md · desplegar.sh · otorgar_roles.sh · consultar.py · ver_registro.py · skills/
 sesion-3-evaluacion/    guia.md · evalsets y configuraciones
 sesion-5-produccion/    guia.md · ver_trazas.py
