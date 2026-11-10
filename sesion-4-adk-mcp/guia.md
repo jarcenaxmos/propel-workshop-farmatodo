@@ -90,6 +90,8 @@ import google.auth
 import google.auth.transport.requests
 from google.adk.tools.mcp_tool import McpToolset
 from google.adk.tools.mcp_tool import StreamableHTTPConnectionParams
+
+from .conexion_google import cliente_http, url_mcp
 ```
 
 **2.2** Debajo de la línea de `MODEL`, agrega la autenticación y el toolset:
@@ -111,7 +113,7 @@ def encabezados_google(_contexto=None) -> dict[str, str]:
 
 logging_mcp = McpToolset(
     connection_params=StreamableHTTPConnectionParams(
-        url="https://logging.googleapis.com/mcp", timeout=30),
+        url=url_mcp("logging"), timeout=30, httpx_client_factory=cliente_http),
     header_provider=encabezados_google,
     tool_filter=["list_log_entries", "list_log_names"],
 )
@@ -143,7 +145,7 @@ root_agent = LlmAgent(
 
 Qué acabas de usar:
 
-- `header_provider` se llama en cada conexión, así el token nunca queda vencido. En tu máquina es tu usuario; desplegado, es la cuenta de servicio del agente.
+- `header_provider` se llama en cada conexión, así el token nunca queda vencido. En tu máquina es tu usuario; desplegado, es la Agent Identity del agente.
 - `tool_filter` decide qué herramientas ve el modelo. El servidor de Logging ofrece seis; el agente solo necesita leer entradas.
 
 **Punto de control.**
@@ -167,7 +169,7 @@ Ves una línea `[tool] list_log_entries` con un filtro que incluye `timestamp>=`
 ```python
 monitoring_mcp = McpToolset(
     connection_params=StreamableHTTPConnectionParams(
-        url="https://monitoring.googleapis.com/mcp", timeout=30),
+        url=url_mcp("monitoring"), timeout=30, httpx_client_factory=cliente_http),
     header_provider=encabezados_google,
     tool_filter=["list_timeseries", "list_alert_policies"],
 )
@@ -386,7 +388,7 @@ Ves `[resultado] list_log_entries: {'error': 'Consulta bloqueada por politica...
 | `tickets.py` escribe un JSON | `ApplicationIntegrationToolset` con el conector de Jira o ServiceNow, o el servidor MCP de tu mesa de ayuda. Se mantiene `require_confirmation`. No se probó en este repo. |
 | `servidor_contexto` lee un JSON | El mismo servidor llamando a tu CMDB y a tu CI/CD, desplegado en Cloud Run con Streamable HTTP |
 | Tú escribes la pregunta | Una política de alertas notifica a Pub/Sub y eso invoca al agente. Ese disparador hay que construirlo. |
-| Tu usuario llama a los MCP | Una cuenta de servicio del agente con `roles/mcp.toolUser`, `roles/logging.viewer` y `roles/monitoring.viewer` (ver sesión II) |
+| Tu usuario llama a los MCP | La Agent Identity del agente con `roles/mcp.toolUser`, `roles/logging.viewer` y `roles/monitoring.viewer` (ver sesión II) |
 
 ## Si algo falla
 

@@ -17,12 +17,13 @@ Cada participante hace los labs desde Cloud Shell (en el navegador de su PC), en
 | `roles/logging.logWriter` | `setup.sh` escribe los logs de ejemplo | IV |
 | `roles/monitoring.editor` | `setup.sh` escribe las métricas de ejemplo y crea la política de alertas | IV |
 | `roles/serviceusage.serviceUsageAdmin` | Habilitar APIs (no hace falta si un admin ya las habilitó) | todas |
-| `roles/iam.serviceAccountAdmin` y `roles/resourcemanager.projectIamAdmin` | Crear la cuenta de servicio del agente y darle roles | II |
-| `roles/iam.serviceAccountUser` | Desplegar el agente con esa cuenta de servicio | II |
+| `roles/resourcemanager.projectIamAdmin` | Darle roles a la Agent Identity del agente (`otorgar_roles.sh`) y quitárselos al limpiar | II |
 | `roles/modelarmor.admin` | Crear el template de Model Armor | VI |
 | `roles/agentregistry.viewer` | Ver agentes y servidores MCP en Agent Registry | II |
 
 La documentación de los MCP pide `roles/logging.admin` y `roles/monitoring.admin`. Los labs solo usan herramientas de lectura y se probaron con los roles viewer de la tabla. La opción mínima no se probó completa de punta a punta: la prueba se hizo con `roles/owner`.
+
+**Agent Identity (sesión II).** El agente se despliega con Agent Identity, nunca con una cuenta de servicio. La identidad es un principal `principal://agents.global.org-ID_ORG.system.id.goog/resources/aiplatform/...` si el proyecto está dentro de una organización, o `principal://agents.global.proj-NUMERO_DE_PROYECTO.system.id.goog/resources/aiplatform/...` si **no** tiene organización; `otorgar_roles.sh` detecta cuál corresponde. Requisitos: la API `aiplatform.googleapis.com` habilitada, poder crear instancias de Agent Runtime (`roles/aiplatform.user` o `roles/owner`) y poder asignar roles en el proyecto (`roles/resourcemanager.projectIamAdmin` o `roles/owner`). Una política de organización no debe bloquear a las identidades de agentes ni las ubicaciones usadas.
 
 Si la organización restringe ubicaciones (`gcp.resourceLocations`), el proyecto debe permitir `global` (Gemini) y una región de Agent Runtime, por defecto `us-central1`.
 

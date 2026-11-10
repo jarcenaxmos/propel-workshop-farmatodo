@@ -16,9 +16,15 @@ cd propel-workshop-farmatodo && source .venv/bin/activate
 
 El script hace tres cosas, y vale la pena leerlo:
 
-1. **Identidad.** Crea la cuenta de servicio `agente-obs` con permisos de solo lectura sobre las señales (`roles/mcp.toolUser`, `roles/logging.viewer`, `roles/monitoring.viewer`), más `roles/aiplatform.user` para llamar a Gemini y los roles para escribir su propia telemetría. Desplegado, el agente ya no usa tu usuario.
+1. **Identidad (Agent Identity).** Crea una instancia vacía de Agent Runtime con `identity_type: AGENT_IDENTITY`. El agente recibe una identidad propia, única por instancia, que no es tu usuario ni una cuenta de servicio y no tiene llaves que guardar o rotar. La identidad se elige al crear la instancia y no se puede cambiar después. Luego `otorgar_roles.sh` le da, con mínimo privilegio, estos roles sobre el proyecto:
+   - Leer señales: `roles/mcp.toolUser`, `roles/logging.viewer`, `roles/monitoring.viewer`.
+   - Correr: `roles/aiplatform.user` (Gemini) y `roles/serviceusage.serviceUsageConsumer`.
+   - Su propia telemetría: `roles/logging.logWriter`, `roles/monitoring.metricWriter`, `roles/telemetry.tracesWriter`.
+
+   Su identidad es un principal con este formato (con organización; sin organización el dominio es `agents.global.proj-NUMERO_DE_PROYECTO.system.id.goog`):
+   `principal://agents.global.org-ID_ORG.system.id.goog/resources/aiplatform/projects/NUMERO/locations/REGION/reasoningEngines/ID`
 2. **Paquete.** Arma en `build/agente_obs/` una carpeta autocontenida: el agente, el servidor MCP de contexto, el catálogo, `requirements.txt` y `.env`.
-3. **Despliegue.** Ejecuta `adk deploy agent_engine` con `--service_account` y `--otel_to_cloud`.
+3. **Despliegue.** Ejecuta `adk deploy agent_engine --agent_engine_id ID --otel_to_cloud` para subir el código a esa instancia. No lleva `--service_account`: con Agent Identity no se usa.
 
 **Qué deberías ver.** Al final, `Deployed to Agent Platform: projects/.../reasoningEngines/NNN` y un enlace al playground de la consola. En la prueba tardó 6 minutos la primera vez y 3 minutos y medio al actualizar. Lánzalo y sigue escuchando la charla.
 
@@ -33,7 +39,7 @@ python sesion-2-agent-runtime/consultar.py
 python sesion-2-agent-runtime/consultar.py "Que equipo atiende pedidos-api?"
 ```
 
-**Qué deberías ver.** Las mismas líneas `[tool]` que en tu máquina y el diagnóstico del incidente. Ahora las llamadas a los MCP las hace la cuenta de servicio del agente, y el servidor MCP de contexto corre como proceso hijo dentro del contenedor.
+**Qué deberías ver.** Las mismas líneas `[tool]` que en tu máquina y el diagnóstico del incidente. Ahora las llamadas a los MCP las hace la Agent Identity del agente, y el servidor MCP de contexto corre como proceso hijo dentro del contenedor.
 
 `consultar.py` son 15 líneas útiles: `vertexai.Client(...).agent_engines.get(name=...)` y `async_stream_query(...)`.
 
@@ -52,6 +58,8 @@ En la consola: **Agent Platform → Agent Registry**.
 
 ## Para tener en cuenta
 
+- **Con Agent Identity el token va ligado al certificado del agente (mTLS).** Las librerías de Google lo manejan solas, pero el cliente HTTP del MCP no: con el endpoint normal (`logging.googleapis.com/mcp`) el servidor responde `401`. Por eso `agente_obs/conexion_google.py` usa `logging.mtls.googleapis.com/mcp` con el certificado cuando corre desplegado. En tu máquina no hay certificado y usa el endpoint normal.
+- Para ver la identidad en la consola: **Agent Platform → Agent Runtime → tu agente → Identity**.
 - Dentro de Agent Runtime, `GOOGLE_CLOUD_PROJECT` trae el **número** del proyecto. Los filtros de logs necesitan el id, y por eso el paquete define `SIGNALS_PROJECT_ID`.
 - La aprobación humana del paso 5 también funciona desplegada: el pedido de confirmación llega como un evento y se responde con otro mensaje en la misma sesión. Se probó por API, no en el playground de la consola.
 - Los tickets se escriben en `/tmp/tickets` del contenedor y se pierden. En producción la herramienta llamaría a la mesa de ayuda real.

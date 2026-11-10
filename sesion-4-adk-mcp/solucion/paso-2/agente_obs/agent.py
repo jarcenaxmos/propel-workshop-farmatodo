@@ -13,6 +13,9 @@ from google.adk.models import Gemini
 from google.adk.tools.mcp_tool import McpToolset
 from google.adk.tools.mcp_tool import StreamableHTTPConnectionParams
 
+from .conexion_google import cliente_http
+from .conexion_google import url_mcp
+
 # Proyecto donde estan las senales. Desplegado en Agent Runtime,
 # GOOGLE_CLOUD_PROJECT trae el NUMERO del proyecto y los filtros de logs
 # necesitan el id, por eso se puede indicar aparte.
@@ -26,7 +29,7 @@ MODEL = Gemini(model=os.environ.get("MODEL", "gemini-3.8-flash"),
 
 # --- Autenticacion hacia los servidores MCP de Google Cloud -----------------
 # Usan OAuth 2.0 + IAM. El agente presenta un access token de las credenciales
-# por defecto: tu usuario en Cloud Shell, la cuenta de servicio en Agent Runtime.
+# por defecto: tu usuario en Cloud Shell, la Agent Identity del agente en Agent Runtime.
 _credenciales, _ = google.auth.default(
     scopes=["https://www.googleapis.com/auth/cloud-platform"])
 
@@ -44,7 +47,7 @@ def encabezados_google(_contexto=None) -> dict[str, str]:
 # --- PASO 2: senales de Cloud Logging por MCP --------------------------------
 logging_mcp = McpToolset(
     connection_params=StreamableHTTPConnectionParams(
-        url="https://logging.googleapis.com/mcp", timeout=30),
+        url=url_mcp("logging"), timeout=30, httpx_client_factory=cliente_http),
     header_provider=encabezados_google,
     # Solo lectura y solo lo necesario: el modelo no ve el resto de las tools.
     tool_filter=["list_log_entries", "list_log_names"],

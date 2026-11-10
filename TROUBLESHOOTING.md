@@ -85,7 +85,16 @@ Las señales ya no caen en la última hora. Ejecuta `python scripts/sembrar_sena
 ## Agent Runtime
 
 **`desplegar.sh` falla al otorgar roles**
-Necesitas `roles/resourcemanager.projectIamAdmin` y `roles/iam.serviceAccountAdmin`, o `roles/owner`. Si el error es `concurrent policy changes`, el script ya reintenta; vuelve a ejecutarlo.
+Necesitas `roles/resourcemanager.projectIamAdmin` (o `roles/owner`). Si el error es `concurrent policy changes`, o el principal aún no existe, el script reintenta; vuelve a ejecutarlo.
+
+**El agente desplegado responde pero las herramientas de Logging y Monitoring fallan (`HTTP 401 Unauthorized` en `logging.googleapis.com/mcp`)** *(observado)*
+Con Agent Identity el token está ligado al certificado del agente y el cliente HTTP del MCP no lo presenta. El agente debe usar el endpoint mTLS (`logging.mtls.googleapis.com/mcp`) con el certificado: lo hace `sesion-4-adk-mcp/agente_obs/conexion_google.py`. Si copiaste el agente a otra carpeta, copia también ese archivo. Un 401 también puede salir si dejas `url="https://logging.googleapis.com/mcp"` a mano. No apagues `GOOGLE_API_ENABLE_RUNTIME_BOUND_TOKEN`. Se ve en los logs del agente: `gcloud logging read 'resource.type="aiplatform.googleapis.com/ReasoningEngine" AND textPayload:"401"'`. Ojo: con el 401 el modelo puede inventar una respuesta plausible a partir del catálogo; revisa que aparezcan datos de `list_log_entries`.
+
+**Ya borré el agente y al crear otro dejó de tener permisos** *(observado)*
+Cada instancia tiene su propia identidad: los roles de la anterior no pasan a la nueva y los de la anterior no se borran solos. `./sesion-2-agent-runtime/desplegar.sh` los da de nuevo; `./cleanup.sh` quita los de las instancias que borra.
+
+**El proyecto no está en una organización**
+La identidad usa el dominio `agents.global.proj-NUMERO_DE_PROYECTO.system.id.goog` en lugar de `agents.global.org-ID_ORG.system.id.goog`. `otorgar_roles.sh` lo detecta solo (*no probado: el proyecto de prueba tiene organización; el formato es el de la documentación*).
 
 **El despliegue tarda más de 10 minutos o falla en la construcción** *(previsto)*
 Revisa `sesion-2-agent-runtime/build/deploy.log` y los logs en la consola: **Agent Platform → Agent Runtime → tu agente → Logs**. Volver a ejecutar `./desplegar.sh` actualiza el mismo recurso.

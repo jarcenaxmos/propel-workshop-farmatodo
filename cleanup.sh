@@ -5,7 +5,8 @@
 #   - senales de ejemplo: log farmalab-app, metricas custom farmalab/*, politica de alertas
 #   - agente(s) "agente-obs-farmalab" en Agent Runtime (sesion II)
 #   - template de Model Armor farmalab-guardrail (sesion VI)
-#   - cuenta de servicio agente-obs y sus roles (sesion II)
+#   - roles de Agent Identity del agente en el proyecto (sesion II)
+#   - skill redactar-ticket-incidente de Agent Registry (sesion II)
 # No deshabilita APIs ni borra el proyecto.
 #   ./cleanup.sh            pide que escribas el id del proyecto para confirmar
 #   ./cleanup.sh --local    ademas borra .venv, .env, tickets/ y archivos generados
@@ -31,37 +32,37 @@ fi
 
 echo "== Agent Runtime"
 API="https://${REGION}-aiplatform.googleapis.com/v1"
-curl -s -H "Authorization: Bearer ${TOKEN}" \
+IDS="$(curl -s -H "Authorization: Bearer ${TOKEN}" \
   "${API}/projects/${PROJECT_ID}/locations/${REGION}/reasoningEngines?pageSize=100" \
   | python3 -c '
 import json, sys
 for e in json.load(sys.stdin).get("reasoningEngines", []):
     if e.get("displayName") == "agente-obs-farmalab":
-        print(e["name"])' \
-  | while read -r nombre; do
-      echo "borrando ${nombre}"
-      curl -s -X DELETE -H "Authorization: Bearer ${TOKEN}" "${API}/${nombre}?force=true" >/dev/null
-    done
+        print(e["name"])')"
+[[ -f "${AQUI}/sesion-2-agent-runtime/.agent_engine_id" ]] \
+  && IDS="${IDS}"$'\n'"projects/x/locations/${REGION}/reasoningEngines/$(cat "${AQUI}/sesion-2-agent-runtime/.agent_engine_id")"
+printf '%s\n' "${IDS}" | sort -u | while read -r nombre; do
+  [[ -n "${nombre}" ]] || continue
+  echo "borrando ${nombre}"
+  curl -s -X DELETE -H "Authorization: Bearer ${TOKEN}" "${API}/${nombre}?force=true" >/dev/null
+  # Agent Identity: el principal muere con la instancia, pero sus roles en el
+  # proyecto NO se borran solos y quedarian como permisos huerfanos.
+  echo "quitando los roles de su identidad"
+  PROJECT_ID="${PROJECT_ID}" REGION="${REGION}" \
+    "${AQUI}/sesion-2-agent-runtime/otorgar_roles.sh" --id "$(basename "${nombre}")" --quitar >/dev/null 2>&1 \
+    && echo "roles quitados" || echo "[!] revisa los roles huerfanos con: gcloud projects get-iam-policy ${PROJECT_ID} | grep reasoningEngines"
+done
 rm -f "${AQUI}/sesion-2-agent-runtime/.agent_engine_id"
+
+echo "== Skills de Agent Registry"
+if [[ -x "${AQUI}/.venv/bin/python" ]]; then
+  PROJECT_ID="${PROJECT_ID}" "${AQUI}/.venv/bin/python" "${AQUI}/sesion-2-agent-runtime/skills/publicar_skill.py" --borrar 2>&1 | grep -v -i warn
+fi
 
 echo "== Model Armor"
 CLOUDSDK_API_ENDPOINT_OVERRIDES_MODELARMOR="https://modelarmor.${REGION}.rep.googleapis.com/" \
   gcloud model-armor templates delete farmalab-guardrail --location="${REGION}" \
   --project="${PROJECT_ID}" --quiet 2>/dev/null && echo "template borrado" || echo "no habia template"
-
-echo "== Cuenta de servicio del agente"
-SA="agente-obs@${PROJECT_ID}.iam.gserviceaccount.com"
-if gcloud iam service-accounts describe "${SA}" --project="${PROJECT_ID}" >/dev/null 2>&1; then
-  for rol in roles/aiplatform.user roles/mcp.toolUser roles/logging.viewer \
-             roles/monitoring.viewer roles/logging.logWriter \
-             roles/monitoring.metricWriter roles/cloudtrace.agent; do
-    gcloud projects remove-iam-policy-binding "${PROJECT_ID}" --member="serviceAccount:${SA}" \
-      --role="${rol}" --condition=None --format=none >/dev/null 2>&1 || true
-  done
-  gcloud iam service-accounts delete "${SA}" --project="${PROJECT_ID}" --quiet && echo "cuenta de servicio borrada"
-else
-  echo "no habia cuenta de servicio"
-fi
 
 if [[ "${1:-}" == "--local" ]]; then
   echo "== Archivos locales"

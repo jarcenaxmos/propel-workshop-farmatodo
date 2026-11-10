@@ -27,7 +27,7 @@ source .venv/bin/activate
 | Sesión | Lab | Tiempo | Guía |
 |---|---|---|---|
 | **IV · ADK y Model Context Protocol** | **Hands-on: agente de observabilidad con MCP y aprobación humana** | **90 min** | [`sesion-4-adk-mcp/guia.md`](sesion-4-adk-mcp/guia.md) |
-| II · Agent Runtime y Agent Registry | Desplegar el agente con identidad propia y verlo registrado | 10 min (6 de espera) | [`sesion-2-agent-runtime/guia.md`](sesion-2-agent-runtime/guia.md) |
+| II · Agent Runtime y Agent Registry | Desplegar el agente con Agent Identity, verlo registrado y publicar una skill versionada | 10 min (6 de espera) | [`sesion-2-agent-runtime/guia.md`](sesion-2-agent-runtime/guia.md) |
 | III · Gen AI Evaluation | Evaluar el agente con `adk eval`: trayectoria, rúbricas y una regresión | 10 min | [`sesion-3-evaluacion/guia.md`](sesion-3-evaluacion/guia.md) |
 | V · Agentes en producción | Trazas del agente desplegado: tiempos y tokens | 5 min | [`sesion-5-produccion/guia.md`](sesion-5-produccion/guia.md) |
 | VI · Model Armor | Un template de Model Armor delante y detrás del modelo | 10 min | [`sesion-6-model-armor/guia.md`](sesion-6-model-armor/guia.md) |
@@ -44,7 +44,7 @@ La sesión I es charla y no tiene lab. Los ejemplos de II, III, V y VI usan la s
 | Política de alertas | "Farmalab: tasa de error alta en pagos-gateway" |
 | Local | `.venv/` con las dependencias y `.env` con tu proyecto |
 
-Los ejemplos cortos crean además un agente en Agent Runtime, la cuenta de servicio `agente-obs` y un template de Model Armor. `cleanup.sh` borra todo.
+Los ejemplos cortos crean además un agente en Agent Runtime, una skill en Agent Registry (sesión II), roles IAM para la Agent Identity del agente y un template de Model Armor. `cleanup.sh` borra todo, incluidos esos roles.
 
 Las señales cubren la última hora. Si retomas el lab más tarde, renueva el incidente:
 
@@ -60,7 +60,7 @@ PRERREQUISITOS.md  TROUBLESHOOTING.md
 datos/                  catalogo de servicios ficticio
 scripts/                sembrar_senales.py · verificar.py · probar_agente.py
 sesion-4-adk-mcp/       guia.md · agente_obs/ (tu trabajo) · servidor_contexto/ · solucion/paso-1..6
-sesion-2-agent-runtime/ guia.md · desplegar.sh · consultar.py · ver_registro.py
+sesion-2-agent-runtime/ guia.md · desplegar.sh · otorgar_roles.sh · consultar.py · ver_registro.py · skills/
 sesion-3-evaluacion/    guia.md · evalsets y configuraciones
 sesion-5-produccion/    guia.md · ver_trazas.py
 sesion-6-model-armor/   guia.md · crear_template.sh · probar_template.py · agente_protegido/
