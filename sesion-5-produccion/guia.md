@@ -15,7 +15,7 @@ python sesion-2-agent-runtime/consultar.py
 python sesion-5-produccion/ver_trazas.py
 ```
 
-Las trazas tardan cerca de un minuto en aparecer. Si el segundo comando no encuentra nada, repítelo.
+Las trazas tardan cerca de un minuto en aparecer; en un proyecto nuevo, la primera puede tardar un poco más (en la prueba hubo que repetir la consulta y esperar). Si el segundo comando no encuentra nada, repítelo.
 
 **Qué deberías ver.** Una tabla con los spans de la última consulta:
 

@@ -105,6 +105,11 @@ Elige una región permitida: `REGION=us-east1 ./setup.sh` y después `./sesion-2
 **`gcloud agent-registry: Invalid choice`**
 Tu Google Cloud CLI es anterior a ese grupo de comandos. Usa `python sesion-2-agent-runtime/ver_registro.py`, que llama a la API REST, o actualiza con `gcloud components update`.
 
+## Trazas
+
+**`ver_trazas.py`: "No hay trazas del agente en los ultimos 30 minutos"** *(observado)*
+En un proyecto recién creado la primera traza tarda más de un minuto en llegar a Cloud Trace. Consulta otra vez al agente (`python sesion-2-agent-runtime/consultar.py`), espera un minuto y repite. Si sigue vacío, revisa que el agente se desplegó con `--otel_to_cloud` (lo hace `desplegar.sh`) y que su identidad tiene `roles/telemetry.tracesWriter`.
+
 ## Skills de Agent Registry
 
 **`503 The service is currently unavailable` al listar o crear skills** *(observado)*
