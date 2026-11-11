@@ -139,3 +139,11 @@ El template se crea en la `REGION` de tu `.env`. Si cambiaste de región, vuelve
 # espera unos 10 minutos
 ./setup.sh
 ```
+
+**`ERROR - mcp_toolset.py - Exception during MCP session execution: Failed to get tools from MCP server: Connection closed`** (en `adk eval` o en `probar_agente.py`)
+
+El servidor MCP de Google cerró una sesión que ADK tenía abierta. ADK la descarta y reintenta solo una vez; si el reintento funciona, el resultado no cambia y la traza es solo ruido. `scripts/probar_agente.py` ya no la muestra y `sesion-3-evaluacion/evaluar.sh` la deja en `build/eval-<caso>.log`. Si el reintento también falla, el error sí aparece (y la evaluación termina sin `Tests passed`). Visto en Cloud Shell con Python 3.12.
+
+**La salida de `adk eval` se ve cortada o mezclada en Cloud Shell**
+
+`adk eval` escribe en la misma terminal el resultado y una línea de log por cada llamada HTTP. Usa `./sesion-3-evaluacion/evaluar.sh` (resumen en pantalla, detalle en `build/`), o agrega `--log_level warning 2> build/eval.log` al comando directo.

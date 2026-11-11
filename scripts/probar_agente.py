@@ -20,6 +20,16 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
+import logging
+
+# Si un servidor MCP cierra la sesion ("Failed to get tools from MCP server:
+# Connection closed"), ADK la descarta y reintenta solo. Esa traza no es un
+# error del lab; si el reintento tambien falla, la excepcion igual se muestra.
+for _nombre in ("google_adk.google.adk.tools.mcp_tool.mcp_toolset",
+                "google_adk.google.adk.tools.mcp_tool.mcp_session_manager"):
+  logging.getLogger(_nombre).setLevel(logging.CRITICAL)
+logging.getLogger("httpx").setLevel(logging.WARNING)
+
 import dotenv
 
 # Carga el .env de la raiz del repo (lo crea setup.sh) antes de importar el agente.

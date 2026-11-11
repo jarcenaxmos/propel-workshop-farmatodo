@@ -13,16 +13,13 @@ cd propel-workshop-farmatodo && source .venv/bin/activate
 `contexto.evalset.json` tiene tres preguntas con respuesta determinística. Cada caso declara qué herramienta debe llamar el agente, con qué argumentos, y una respuesta de referencia.
 
 ```bash
-adk eval sesion-4-adk-mcp/solucion/paso-5/agente_obs \
-  sesion-3-evaluacion/contexto.evalset.json \
-  --config_file_path sesion-3-evaluacion/contexto.config.json \
-  --print_detailed_results
+./sesion-3-evaluacion/evaluar.sh contexto
 ```
 
-**Qué deberías ver.** `Tests passed: 3` y, por caso:
+**Qué deberías ver.** Un resumen corto: por cada caso su estado y sus métricas, y al final `Tests passed: 3`.
 
-- `tool_trajectory_avg_score: PASSED (1.0)`: llamó exactamente a la herramienta esperada.
-- `final_response_match_v2: PASSED`: un modelo juez comparó la respuesta con la de referencia.
+- `tool_trajectory_avg_score  PASSED  1.00`: llamó exactamente a la herramienta esperada.
+- `final_response_match_v2  PASSED`: un modelo juez comparó la respuesta con la de referencia.
 - Métricas informativas que nunca fallan: `tool_call_count_v1`, `token_usage_v1`, `invocation_duration_v1`.
 
 Tarda cerca de un minuto (medido: 1 min).
@@ -32,10 +29,7 @@ Tarda cerca de un minuto (medido: 1 min).
 "Investiga qué pasa con pagos-gateway" no tiene una única trayectoria correcta: los filtros llevan horas y el orden de las consultas puede variar. Ahí se evalúa con rúbricas. Abre `incidente.config.json`: cada rúbrica es una frase que el juez marca como cumplida o no.
 
 ```bash
-adk eval sesion-4-adk-mcp/solucion/paso-5/agente_obs \
-  sesion-3-evaluacion/incidente.evalset.json \
-  --config_file_path sesion-3-evaluacion/incidente.config.json \
-  --print_detailed_results
+./sesion-3-evaluacion/evaluar.sh incidente
 ```
 
 **Qué deberías ver.** `Tests passed: 1`, con el puntaje de cada rúbrica (`error_dominante`, `despliegue`, `usa_metricas`, `no_crea_ticket`, etc.) y la razón que dio el juez. Tarda unos dos minutos (medido: 2 min).
@@ -45,14 +39,14 @@ adk eval sesion-4-adk-mcp/solucion/paso-5/agente_obs \
 Evalúa una versión anterior del agente con el mismo evalset. El paso 3 todavía no tiene el contexto del negocio:
 
 ```bash
-adk eval sesion-4-adk-mcp/solucion/paso-3/agente_obs \
-  sesion-3-evaluacion/contexto.evalset.json \
-  --config_file_path sesion-3-evaluacion/contexto.config.json
+./sesion-3-evaluacion/evaluar.sh regresion
 ```
 
 **Qué deberías ver.** `Tests failed: 3`, tras unos cinco minutos: sin el contexto del negocio el agente se pone a buscar con otras herramientas antes de rendirse, y eso es lo que tarda. Eso es lo que detiene un pull request cuando alguien cambia un prompt, una herramienta o el modelo.
 
-Otras pruebas: cambia el modelo con `MODEL=gemini-3.5-flash-lite adk eval ...`, o repite cada caso con `--num_runs 3` para medir estabilidad.
+Otras pruebas: cambia el modelo con `MODEL=gemini-3.5-flash-lite ./sesion-3-evaluacion/evaluar.sh contexto`, o repite cada caso con `./sesion-3-evaluacion/evaluar.sh contexto --num_runs 3` para medir estabilidad.
+
+**Sobre el script.** `evaluar.sh` ejecuta `adk eval` con `--print_detailed_results` y deja en pantalla solo el resumen. El resultado completo queda en `build/eval-<caso>.txt` y el log en `build/eval-<caso>.log`. Si prefieres el comando directo, está al inicio del script. En el log puede aparecer `Failed to get tools from MCP server: Connection closed`: el servidor MCP cerró una sesión y ADK la reintentó solo; no afecta el resultado.
 
 ## Para tener en cuenta
 
