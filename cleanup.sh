@@ -69,4 +69,8 @@ if [[ "${1:-}" == "--local" ]]; then
   find "${AQUI}" \( -name tickets -o -name .adk -o -name __pycache__ \) -type d -prune -exec rm -rf {} +
   find "${AQUI}" \( -name "*.respaldo" -o -name "*.evalset_result.json" \) -delete
 fi
+echo "== Bucket de evaluaciones (sesion III, --gcs)"
+gcloud storage rm --recursive "gs://${EVAL_BUCKET:-${PROJECT_ID}-evals}" --project="${PROJECT_ID}" --quiet >/dev/null 2>&1 \
+  && echo "  borrado gs://${EVAL_BUCKET:-${PROJECT_ID}-evals}" || echo "  (no existia)"
+
 echo "Listo. Si creaste el proyecto solo para el workshop, tambien puedes borrarlo completo."

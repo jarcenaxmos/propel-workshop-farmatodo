@@ -6,6 +6,11 @@
 #   ./sesion-3-evaluacion/evaluar.sh incidente    # paso 2: rubricas (~2 min)
 #   ./sesion-3-evaluacion/evaluar.sh regresion    # paso 3: agente del paso 3, debe fallar (~5 min)
 #
+# Con --gcs los resultados tambien quedan en un bucket de Cloud Storage
+# (gs://<proyecto>-evals, o el que indiques en EVAL_BUCKET). Si el bucket no
+# existe, se crea en tu REGION:
+#   ./sesion-3-evaluacion/evaluar.sh regresion --gcs
+#
 # Cualquier argumento extra pasa tal cual a `adk eval`, por ejemplo:
 #   ./sesion-3-evaluacion/evaluar.sh contexto --num_runs 3
 #   MODEL=gemini-3.5-flash-lite ./sesion-3-evaluacion/evaluar.sh contexto
@@ -29,6 +34,27 @@ case "${CASO}" in
   *) echo "Uso: $0 contexto|incidente|regresion [argumentos extra de adk eval]" >&2; exit 2 ;;
 esac
 
+# --gcs puede ir en cualquier posicion; el resto pasa tal cual a adk eval.
+GCS=0
+EXTRA=()
+for a in "$@"; do
+  if [[ "${a}" == "--gcs" ]]; then GCS=1; else EXTRA+=("${a}"); fi
+done
+
+if [[ "${GCS}" == 1 ]]; then
+  # Proyecto y region del .env que crea setup.sh.
+  [[ -f .env ]] && set -a && source .env && set +a
+  PROYECTO="${GOOGLE_CLOUD_PROJECT:?Falta GOOGLE_CLOUD_PROJECT: ejecuta ./setup.sh}"
+  BUCKET="${EVAL_BUCKET:-${PROYECTO}-evals}"
+  if ! gcloud storage buckets describe "gs://${BUCKET}" --project="${PROYECTO}" >/dev/null 2>&1; then
+    echo "Creando el bucket gs://${BUCKET} en ${REGION:-us-central1} ..."
+    gcloud storage buckets create "gs://${BUCKET}" --project="${PROYECTO}" \
+      --location="${REGION:-us-central1}" --uniform-bucket-level-access --quiet || exit 1
+  fi
+  export GOOGLE_CLOUD_PROJECT="${PROYECTO}"
+  EXTRA+=(--eval_storage_uri "gs://${BUCKET}")
+fi
+
 ADK="adk"
 [[ -x .venv/bin/adk ]] && ADK=".venv/bin/adk"
 mkdir -p build
@@ -39,7 +65,7 @@ echo "Evaluando ${AGENTE} con ${SET}.evalset.json ..."
 echo "(log completo en ${LOG}; resultado completo en ${OUT})"
 "${ADK}" eval "${AGENTE}" "sesion-3-evaluacion/${SET}.evalset.json" \
   --config_file_path "sesion-3-evaluacion/${SET}.config.json" \
-  --print_detailed_results --log_level warning "$@" > "${OUT}" 2> "${LOG}"
+  --print_detailed_results --log_level warning ${EXTRA[@]+"${EXTRA[@]}"} > "${OUT}" 2> "${LOG}"
 CODIGO=$?
 
 if ! grep -q "Tests passed" "${OUT}"; then
@@ -83,5 +109,12 @@ for linea in open(sys.argv[1], encoding="utf-8"):
   elif linea.startswith("Eval Run Summary"):
     print("\n=== Resumen ===")
 PY
+
+if [[ "${GCS}" == 1 ]]; then
+  echo
+  echo "Resultados en Cloud Storage:"
+  gcloud storage ls "gs://${BUCKET}/**" 2>/dev/null | tail -n 5
+  echo "Consola: https://console.cloud.google.com/storage/browser/${BUCKET}?project=${PROYECTO}"
+fi
 
 exit "${CODIGO}"

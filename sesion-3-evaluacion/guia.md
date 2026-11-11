@@ -46,6 +46,14 @@ Evalúa una versión anterior del agente con el mismo evalset. El paso 3 todaví
 
 Otras pruebas: cambia el modelo con `MODEL=gemini-3.5-flash-lite ./sesion-3-evaluacion/evaluar.sh contexto`, o repite cada caso con `./sesion-3-evaluacion/evaluar.sh contexto --num_runs 3` para medir estabilidad.
 
+**Guardar los resultados en Cloud Storage.** `adk eval` corre en tu máquina y no deja nada en la consola de evaluación de Agent Platform. Para dejar los resultados en un bucket, agrega `--gcs`:
+
+```bash
+./sesion-3-evaluacion/evaluar.sh regresion --gcs
+```
+
+Crea (si no existe) `gs://<tu-proyecto>-evals` en tu `REGION` y guarda cada corrida como JSON en `agente_obs/evals/eval_history/`. Al final imprime el enlace al bucket en la consola. Otro nombre: `EVAL_BUCKET=mi-bucket ./sesion-3-evaluacion/evaluar.sh regresion --gcs`. `./cleanup.sh` borra el bucket.
+
 **Sobre el script.** `evaluar.sh` ejecuta `adk eval` con `--print_detailed_results` y deja en pantalla solo el resumen. El resultado completo queda en `build/eval-<caso>.txt` y el log en `build/eval-<caso>.log`. Si prefieres el comando directo, está al inicio del script. En el log puede aparecer `Failed to get tools from MCP server: Connection closed`: el servidor MCP cerró una sesión y ADK la reintentó solo; no afecta el resultado.
 
 ## Para tener en cuenta
